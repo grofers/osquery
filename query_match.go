@@ -75,6 +75,7 @@ type matchParams struct {
 	MinMatch            string        `structs:"minimum_should_match,omitempty"`
 	ZeroTerms           ZeroTerms     `structs:"zero_terms_query,string,omitempty"`
 	Slp                 uint16        `structs:"slop,omitempty"` // only relevant for match_phrase query
+	Name                string        `structs:"_name,omitempty"`
 }
 
 // Match creates a new query of type "match" with the provided field name.
@@ -124,6 +125,11 @@ func newMatch(mType matchType, fieldName string, simpleQuery ...interface{}) *Ma
 // of the query).
 func (q *MatchQuery) Query(data interface{}) *MatchQuery {
 	q.params.Qry = data
+	return q
+}
+
+func (q *MatchQuery) Name(name string) *MatchQuery {
+	q.params.Name = name
 	return q
 }
 
