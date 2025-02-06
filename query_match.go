@@ -128,6 +128,8 @@ func (q *MatchQuery) Query(data interface{}) *MatchQuery {
 	return q
 }
 
+// Name sets the name of the query that is returned in matched_queries in response
+// if document matches the query.
 func (q *MatchQuery) Name(name string) *MatchQuery {
 	q.params.Name = name
 	return q
