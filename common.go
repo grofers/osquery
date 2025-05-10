@@ -23,8 +23,8 @@ func (source Source) Map() map[string]interface{} {
 	return m
 }
 
-// Sort represents a list of SortParams for sorting purpose.
-type Sort []SortParams
+// Sort represents a list of SortOption for sorting purpose.
+type Sort []SortOption
 
 // Order is the ordering for a sort key (ascending, descending).
 type Order string
@@ -56,6 +56,44 @@ const (
 	// SortModeMedian represents the median of values.
 	SortModeMedian Mode = "median"
 )
+
+// SortOption is an interface for different types of sort options
+type SortOption interface {
+	Map() map[string]interface{}
+}
+
+// rawSortField is a simple wrapper for raw sort fields
+type rawSortField string
+
+func (r rawSortField) Map() map[string]interface{} {
+	return map[string]interface{}{
+		string(r): map[string]interface{}{},
+	}
+}
+
+// ScriptSortParams represents a script-based sort option for elasticsearch
+type ScriptSortParams struct {
+	Type   string
+	Script *ScriptField
+	Order  Order
+}
+
+func (s ScriptSortParams) Map() map[string]interface{} {
+	scriptMap := s.Script.Map()["script"].(map[string]interface{})
+
+	sortOptions := map[string]interface{}{
+		"type":   s.Type,
+		"script": scriptMap,
+	}
+
+	if s.Order != "" {
+		sortOptions["order"] = s.Order
+	}
+
+	return map[string]interface{}{
+		"_script": sortOptions,
+	}
+}
 
 type SortParams struct {
 	Field        string

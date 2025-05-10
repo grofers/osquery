@@ -64,9 +64,35 @@ func (req *SearchRequest) Size(size uint64) *SearchRequest {
 }
 
 // Sort sets how the results should be sorted.
-func (req *SearchRequest) Sort(params SortParams) *SearchRequest {
+func (req *SearchRequest) Sort(params SortOption) *SearchRequest {
 	req.sort = append(req.sort, params)
 	return req
+}
+
+// SortField is a convenience method for field-based sorting
+func (req *SearchRequest) SortField(params SortParams) *SearchRequest {
+	return req.Sort(params)
+}
+
+// SortScript is a convenience method for script-based sorting
+func (req *SearchRequest) SortScript(params ScriptSortParams) *SearchRequest {
+	return req.Sort(params)
+}
+
+// SortRaw allows sorting by a raw string like "_score"
+func (req *SearchRequest) SortRaw(field string) *SearchRequest {
+	req.sort = append(req.sort, rawSortField(field))
+	return req
+}
+
+// SortByScript creates a new script-based sort option
+func (req *SearchRequest) SortByScript(scriptField *ScriptField, sortType string, order Order) *SearchRequest {
+	params := ScriptSortParams{
+		Type:   sortType,
+		Script: scriptField,
+		Order:  order,
+	}
+	return req.SortScript(params)
 }
 
 // SearchAfter retrieve the sorted result

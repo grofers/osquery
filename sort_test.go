@@ -139,3 +139,120 @@ func TestSortExtensions(t *testing.T) {
 		},
 	})
 }
+
+func TestScriptSortExtensions(t *testing.T) {
+	runMapTests(t, []mapTest{
+		{
+			"sort with script",
+			Search().SortByScript(
+				Script("test_script").
+					Source("doc['field_name'].value").
+					Lang("painless"),
+				"number",
+				OrderDesc,
+			),
+			map[string]interface{}{
+				"sort": []map[string]interface{}{
+					{
+						"_script": map[string]interface{}{
+							"type": "number",
+							"script": map[string]interface{}{
+								"source": "doc['field_name'].value",
+								"lang":   "painless",
+							},
+							"order": "desc",
+						},
+					},
+				},
+			},
+		},
+		{
+			"sort with script and params",
+			Search().SortByScript(
+				Script("test_script").
+					Source("doc['field_name'].value * params.factor").
+					Lang("painless").
+					Params(ScriptParams{"factor": 1.5}),
+				"number",
+				OrderAsc,
+			),
+			map[string]interface{}{
+				"sort": []map[string]interface{}{
+					{
+						"_script": map[string]interface{}{
+							"type": "number",
+							"script": map[string]interface{}{
+								"source": "doc['field_name'].value * params.factor",
+								"lang":   "painless",
+								"params": map[string]interface{}{
+									"factor": 1.5,
+								},
+							},
+							"order": "asc",
+						},
+					},
+				},
+			},
+		},
+		{
+			"sort with raw field and script",
+			Search().
+				SortRaw("_score").
+				SortByScript(
+					Script("test_script").
+						Source("if (doc['parent_obj.score_field'].size()!=0) { return ( Math.log(doc['parent_obj.score_field'].value*100 + 10 ) * _score ) } else { return _score }").
+						Lang("painless"),
+					"number",
+					OrderDesc,
+				),
+			map[string]interface{}{
+				"sort": []map[string]interface{}{
+					{
+						"_score": map[string]interface{}{},
+					},
+					{
+						"_script": map[string]interface{}{
+							"type": "number",
+							"script": map[string]interface{}{
+								"source": "if (doc['parent_obj.score_field'].size()!=0) { return ( Math.log(doc['parent_obj.score_field'].value*100 + 10 ) * _score ) } else { return _score }",
+								"lang":   "painless",
+							},
+							"order": "desc",
+						},
+					},
+				},
+			},
+		},
+		{
+			"mixed sort with field and script",
+			Search().
+				SortField(SortParams{Field: "regular_field", Order: OrderAsc}).
+				SortByScript(
+					Script("test_script").
+						Source("doc['field_name'].value").
+						Lang("painless"),
+					"number",
+					OrderDesc,
+				),
+			map[string]interface{}{
+				"sort": []map[string]interface{}{
+					{
+						"regular_field": map[string]interface{}{
+							"order": "asc",
+						},
+					},
+					{
+						"_script": map[string]interface{}{
+							"type": "number",
+							"script": map[string]interface{}{
+								"source": "doc['field_name'].value",
+								"lang":   "painless",
+							},
+							"order": "desc",
+						},
+					},
+				},
+			},
+		},
+	})
+}
