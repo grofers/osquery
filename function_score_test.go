@@ -9,7 +9,7 @@ func TestFunctionScore(t *testing.T) {
 		{
 			"function_score query with random_score function",
 			FunctionScore(Term("user", "kimchy")).
-				AddFunction(RandomScore()),
+				Function(RandomScore()),
 			map[string]interface{}{
 				"function_score": map[string]interface{}{
 					"query": map[string]interface{}{
@@ -30,7 +30,7 @@ func TestFunctionScore(t *testing.T) {
 		{
 			"function_score query with random_score function and boost_mode",
 			FunctionScore(Term("user", "kimchy")).
-				AddFunction(RandomScore()).
+				Function(RandomScore()).
 				BoostMode("sum"),
 			map[string]interface{}{
 				"function_score": map[string]interface{}{
@@ -53,7 +53,7 @@ func TestFunctionScore(t *testing.T) {
 		{
 			"function_score query with random_score function with seed",
 			FunctionScore(Term("user", "kimchy")).
-				AddFunction(RandomScore().Seed(42)),
+				Function(RandomScore().Seed(42)),
 			map[string]interface{}{
 				"function_score": map[string]interface{}{
 					"query": map[string]interface{}{
@@ -76,7 +76,7 @@ func TestFunctionScore(t *testing.T) {
 		{
 			"function_score query with random_score function with field",
 			FunctionScore(Term("user", "kimchy")).
-				AddFunction(RandomScore().Field("_seq_no")),
+				Function(RandomScore().Field("_seq_no")),
 			map[string]interface{}{
 				"function_score": map[string]interface{}{
 					"query": map[string]interface{}{
@@ -99,8 +99,8 @@ func TestFunctionScore(t *testing.T) {
 		{
 			"function_score query with multiple functions",
 			FunctionScore(Term("user", "kimchy")).
-				AddFunction(RandomScore()).
-				AddFunction(RandomScore().Seed(123)),
+				Function(RandomScore()).
+				Function(RandomScore().Seed(123)),
 			map[string]interface{}{
 				"function_score": map[string]interface{}{
 					"query": map[string]interface{}{
@@ -126,7 +126,7 @@ func TestFunctionScore(t *testing.T) {
 		{
 			"function_score query with match_all query",
 			FunctionScore(MatchAll()).
-				AddFunction(RandomScore()),
+				Function(RandomScore()),
 			map[string]interface{}{
 				"function_score": map[string]interface{}{
 					"query": map[string]interface{}{
@@ -149,7 +149,7 @@ func TestFunctionScoreWithQuery(t *testing.T) {
 			"query with function_score",
 			Query(
 				FunctionScore(Term("user", "kimchy")).
-					AddFunction(RandomScore()).
+					Function(RandomScore()).
 					BoostMode("sum"),
 			),
 			map[string]interface{}{

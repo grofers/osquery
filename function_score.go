@@ -39,7 +39,7 @@ func FunctionScore(query Mappable) *FunctionScoreQuery {
 	return &FunctionScoreQuery{query: query}
 }
 
-func (q *FunctionScoreQuery) AddFunction(f Function) *FunctionScoreQuery {
+func (q *FunctionScoreQuery) Function(f Function) *FunctionScoreQuery {
 	q.functions = append(q.functions, f)
 	return q
 }
