@@ -140,6 +140,63 @@ func TestFunctionScore(t *testing.T) {
 				},
 			},
 		},
+		{
+			"function_score query with script_score function",
+			FunctionScore(Term("user", "kimchy")).
+				Function(FunctionScriptScore(Script("my_script").Source("doc['my_field'].value * 2.0"))),
+			map[string]interface{}{
+				"function_score": map[string]interface{}{
+					"query": map[string]interface{}{
+						"term": map[string]interface{}{
+							"user": map[string]interface{}{
+								"value": "kimchy",
+							},
+						},
+					},
+					"functions": []map[string]interface{}{
+						{
+							"script_score": map[string]interface{}{
+								"script": map[string]interface{}{
+									"source": "doc['my_field'].value * 2.0",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			"function_score query with script_score function with params",
+			FunctionScore(Term("user", "kimchy")).
+				Function(FunctionScriptScore(Script("my_script").
+					Source("doc['my_field'].value * params.factor").
+					Params(ScriptParams{"factor": 2.0}).
+					Lang("painless"))),
+			map[string]interface{}{
+				"function_score": map[string]interface{}{
+					"query": map[string]interface{}{
+						"term": map[string]interface{}{
+							"user": map[string]interface{}{
+								"value": "kimchy",
+							},
+						},
+					},
+					"functions": []map[string]interface{}{
+						{
+							"script_score": map[string]interface{}{
+								"script": map[string]interface{}{
+									"source": "doc['my_field'].value * params.factor",
+									"params": map[string]interface{}{
+										"factor": 2.0,
+									},
+									"lang": "painless",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	})
 }
 

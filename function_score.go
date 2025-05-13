@@ -7,9 +7,9 @@ type FunctionScoreQuery struct {
 	functions []Function
 	boostMode string
 	scoreMode string
-	maxBoost  float32
-	minScore  float32
-	boost     float32
+	maxBoost  *float32
+	minScore  *float32
+	boost     *float32
 }
 
 type Function interface {
@@ -21,11 +21,8 @@ type RandomScoreFunction struct {
 	field string
 }
 
-type FieldValueFactorFunction struct {
-	field    string
-	factor   float32
-	modifier string
-	missing  float32
+type ScriptScoreFunction struct {
+	script *ScriptField
 }
 
 // Additional functions can be added as per usecase in future like:
@@ -44,8 +41,28 @@ func (q *FunctionScoreQuery) Function(f Function) *FunctionScoreQuery {
 	return q
 }
 
-func (q *FunctionScoreQuery) BoostMode(mode string) *FunctionScoreQuery {
-	q.boostMode = mode
+func (q *FunctionScoreQuery) BoostMode(boostMode string) *FunctionScoreQuery {
+	q.boostMode = boostMode
+	return q
+}
+
+func (q *FunctionScoreQuery) ScoreMode(scoreMode string) *FunctionScoreQuery {
+	q.scoreMode = scoreMode
+	return q
+}
+
+func (q *FunctionScoreQuery) MaxBoost(maxBoost float32) *FunctionScoreQuery {
+	q.maxBoost = &maxBoost
+	return q
+}
+
+func (q *FunctionScoreQuery) MinScore(minScore float32) *FunctionScoreQuery {
+	q.minScore = &minScore
+	return q
+}
+
+func (q *FunctionScoreQuery) Boost(boost float32) *FunctionScoreQuery {
+	q.boost = &boost
 	return q
 }
 
@@ -66,6 +83,22 @@ func (q *FunctionScoreQuery) Map() map[string]interface{} {
 
 	if q.boostMode != "" {
 		m["boost_mode"] = q.boostMode
+	}
+
+	if q.maxBoost != nil {
+		m["max_boost"] = *q.maxBoost
+	}
+
+	if q.scoreMode != "" {
+		m["score_mode"] = q.scoreMode
+	}
+
+	if q.minScore != nil {
+		m["min_score"] = *q.minScore
+	}
+
+	if q.boost != nil {
+		m["boost"] = *q.boost
 	}
 
 	return map[string]interface{}{
@@ -100,5 +133,23 @@ func (f *RandomScoreFunction) Map() map[string]interface{} {
 
 	return map[string]interface{}{
 		"random_score": m,
+	}
+}
+
+func FunctionScriptScore(script *ScriptField) *ScriptScoreFunction {
+	return &ScriptScoreFunction{script: script}
+}
+
+func (f *ScriptScoreFunction) Map() map[string]interface{} {
+	if f.script == nil {
+		return map[string]interface{}{
+			"script_score": map[string]interface{}{},
+		}
+	}
+	scriptMap := f.script.Map()["script"].(map[string]interface{})
+	return map[string]interface{}{
+		"script_score": map[string]interface{}{
+			"script": scriptMap,
+		},
 	}
 }
