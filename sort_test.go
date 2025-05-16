@@ -207,11 +207,9 @@ func TestScriptSortExtensions(t *testing.T) {
 					OrderDesc,
 				),
 			map[string]interface{}{
-				"sort": []map[string]interface{}{
-					{
-						"_score": map[string]interface{}{},
-					},
-					{
+				"sort": []interface{}{
+					"_score",
+					map[string]interface{}{
 						"_script": map[string]interface{}{
 							"type": "number",
 							"script": map[string]interface{}{

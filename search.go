@@ -160,11 +160,15 @@ func (req *SearchRequest) Map() map[string]interface{} {
 		m["size"] = *req.size
 	}
 	if len(req.sort) > 0 {
-		sortMaps := make([]map[string]interface{}, 0, len(req.sort))
+		sortSlice := make([]interface{}, 0, len(req.sort))
 		for _, params := range req.sort {
-			sortMaps = append(sortMaps, params.Map())
+			if rawField, ok := params.(rawSortField); ok {
+				sortSlice = append(sortSlice, string(rawField))
+			} else {
+				sortSlice = append(sortSlice, params.Map())
+			}
 		}
-		m["sort"] = sortMaps
+		m["sort"] = sortSlice
 	}
 	if req.from != nil {
 		m["from"] = *req.from
