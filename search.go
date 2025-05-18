@@ -66,7 +66,9 @@ func (req *SearchRequest) Size(size uint64) *SearchRequest {
 // Sort appends one or more sort options.
 // Accepts any type that implements SortOption (field, script, raw)
 func (req *SearchRequest) Sort(opts ...SortOption) *SearchRequest {
-	req.sort = append(req.sort, opts...)
+	if opts != nil {
+		req.sort = append(req.sort, opts...)
+	}
 	return req
 }
 
@@ -78,13 +80,16 @@ func (req *SearchRequest) SortScript(params ScriptSortParams) *SearchRequest {
 
 // SortRaw allows sorting by a raw string like "_score"
 func (req *SearchRequest) SortRaw(field string) *SearchRequest {
+	if field == "" {
+		return req
+	}
 	req.sort = append(req.sort, rawSortField(field))
 	return req
 }
 
 // ClearSort removes all existing sort options
 func (req *SearchRequest) ClearSort() *SearchRequest {
-	req.sort = nil
+	req.sort = req.sort[:0]
 	return req
 }
 

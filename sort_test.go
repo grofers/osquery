@@ -11,10 +11,10 @@ func TestSortExtensions(t *testing.T) {
 		{
 			"sort with basic order only",
 			Search().Sort(SortParams{Field: "field", Order: OrderAsc}),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"field": map[string]interface{}{
+						"field": map[string]any{
 							"order": "asc",
 						},
 					},
@@ -24,10 +24,10 @@ func TestSortExtensions(t *testing.T) {
 		{
 			"sort with mode",
 			Search().Sort(SortParams{Field: "field", Order: OrderDesc, Mode: SortModeAvg}),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"field": map[string]interface{}{
+						"field": map[string]any{
 							"order": "desc",
 							"mode":  "avg",
 						},
@@ -38,10 +38,10 @@ func TestSortExtensions(t *testing.T) {
 		{
 			"sort with nested_path",
 			Search().Sort(SortParams{Field: "nested.field", Order: OrderAsc, NestedPath: "nested"}),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"nested.field": map[string]interface{}{
+						"nested.field": map[string]any{
 							"order":       "asc",
 							"nested_path": "nested",
 						},
@@ -57,15 +57,15 @@ func TestSortExtensions(t *testing.T) {
 				NestedPath:   "nested",
 				NestedFilter: Match("nested.type").Query("value"),
 			}),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"nested.field": map[string]interface{}{
+						"nested.field": map[string]any{
 							"order":       "asc",
 							"nested_path": "nested",
-							"nested_filter": map[string]interface{}{
-								"match": map[string]interface{}{
-									"nested.type": map[string]interface{}{
+							"nested_filter": map[string]any{
+								"match": map[string]any{
+									"nested.type": map[string]any{
 										"query": "value",
 									},
 								},
@@ -84,16 +84,16 @@ func TestSortExtensions(t *testing.T) {
 				NestedPath:   "nested",
 				NestedFilter: Match("nested.type").Query("value"),
 			}),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"nested.field": map[string]interface{}{
+						"nested.field": map[string]any{
 							"order":       "desc",
 							"mode":        "max",
 							"nested_path": "nested",
-							"nested_filter": map[string]interface{}{
-								"match": map[string]interface{}{
-									"nested.type": map[string]interface{}{
+							"nested_filter": map[string]any{
+								"match": map[string]any{
+									"nested.type": map[string]any{
 										"query": "value",
 									},
 								},
@@ -114,21 +114,21 @@ func TestSortExtensions(t *testing.T) {
 					NestedPath:   "nested",
 					NestedFilter: Match("nested.type").Query("value"),
 				}),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"field1": map[string]interface{}{
+						"field1": map[string]any{
 							"order": "asc",
 						},
 					},
 					{
-						"nested.field": map[string]interface{}{
+						"nested.field": map[string]any{
 							"order":       "desc",
 							"mode":        "min",
 							"nested_path": "nested",
-							"nested_filter": map[string]interface{}{
-								"match": map[string]interface{}{
-									"nested.type": map[string]interface{}{
+							"nested_filter": map[string]any{
+								"match": map[string]any{
+									"nested.type": map[string]any{
 										"query": "value",
 									},
 								},
@@ -152,12 +152,12 @@ func TestScriptSortExtensions(t *testing.T) {
 				"number",
 				OrderDesc,
 			),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"_script": map[string]interface{}{
+						"_script": map[string]any{
 							"type": "number",
-							"script": map[string]interface{}{
+							"script": map[string]any{
 								"source": "doc['field_name'].value",
 								"lang":   "painless",
 							},
@@ -177,15 +177,15 @@ func TestScriptSortExtensions(t *testing.T) {
 				"number",
 				OrderAsc,
 			),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"_script": map[string]interface{}{
+						"_script": map[string]any{
 							"type": "number",
-							"script": map[string]interface{}{
+							"script": map[string]any{
 								"source": "doc['field_name'].value * params.factor",
 								"lang":   "painless",
-								"params": map[string]interface{}{
+								"params": map[string]any{
 									"factor": 1.5,
 								},
 							},
@@ -206,13 +206,13 @@ func TestScriptSortExtensions(t *testing.T) {
 					"number",
 					OrderDesc,
 				),
-			map[string]interface{}{
-				"sort": []interface{}{
+			map[string]any{
+				"sort": []any{
 					"_score",
-					map[string]interface{}{
-						"_script": map[string]interface{}{
+					map[string]any{
+						"_script": map[string]any{
 							"type": "number",
-							"script": map[string]interface{}{
+							"script": map[string]any{
 								"source": "if (doc['parent_obj.score_field'].size()!=0) { return ( Math.log(doc['parent_obj.score_field'].value*100 + 10 ) * _score ) } else { return _score }",
 								"lang":   "painless",
 							},
@@ -233,17 +233,17 @@ func TestScriptSortExtensions(t *testing.T) {
 					"number",
 					OrderDesc,
 				),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"regular_field": map[string]interface{}{
+						"regular_field": map[string]any{
 							"order": "asc",
 						},
 					},
 					{
-						"_script": map[string]interface{}{
+						"_script": map[string]any{
 							"type": "number",
-							"script": map[string]interface{}{
+							"script": map[string]any{
 								"source": "doc['field_name'].value",
 								"lang":   "painless",
 							},
@@ -264,7 +264,7 @@ func TestSortClear(t *testing.T) {
 			Search().
 				Sort(SortParams{Field: "field1", Order: OrderAsc}).
 				ClearSort(),
-			map[string]interface{}{
+			map[string]any{
 				// No "sort" key should be present when sort options are cleared
 			},
 		},
@@ -274,10 +274,10 @@ func TestSortClear(t *testing.T) {
 				Sort(SortParams{Field: "field1", Order: OrderAsc}).
 				ClearSort().
 				Sort(SortParams{Field: "field2", Order: OrderDesc}),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"field2": map[string]interface{}{
+						"field2": map[string]any{
 							"order": "desc",
 						},
 					},
@@ -287,7 +287,7 @@ func TestSortClear(t *testing.T) {
 		{
 			"clear sort with no existing sort options",
 			Search().ClearSort(),
-			map[string]interface{}{
+			map[string]any{
 				// No "sort" key should be present
 			},
 		},
@@ -298,10 +298,10 @@ func TestSortClear(t *testing.T) {
 				Sort(SortParams{Field: "field2", Order: OrderDesc}).
 				ClearSort().
 				Sort(SortParams{Field: "field3", Order: OrderAsc}),
-			map[string]interface{}{
-				"sort": []map[string]interface{}{
+			map[string]any{
+				"sort": []map[string]any{
 					{
-						"field3": map[string]interface{}{
+						"field3": map[string]any{
 							"order": "asc",
 						},
 					},

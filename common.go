@@ -12,8 +12,8 @@ type Source struct {
 }
 
 // Map returns a map representation of the Source object.
-func (source Source) Map() map[string]interface{} {
-	m := make(map[string]interface{})
+func (source Source) Map() map[string]any {
+	m := make(map[string]any)
 	if len(source.includes) > 0 {
 		m["includes"] = source.includes
 	}
@@ -59,15 +59,16 @@ const (
 
 // SortOption is an interface for different types of sort options
 type SortOption interface {
-	Map() map[string]interface{}
+	Map() map[string]any
 }
 
 // rawSortField is a simple wrapper for raw sort fields like "_score"
 type rawSortField string
 
-func (r rawSortField) Map() map[string]interface{} {
-	return map[string]interface{}{
-		string(r): map[string]interface{}{},
+// Map currently doesn't in use but, satisfies SortOption interface
+func (r rawSortField) Map() map[string]any {
+	return map[string]any{
+		string(r): map[string]any{},
 	}
 }
 
@@ -78,22 +79,22 @@ type ScriptSortParams struct {
 	Order  Order
 }
 
-func (s ScriptSortParams) Map() map[string]interface{} {
+func (s ScriptSortParams) Map() map[string]any {
 	if s.Script == nil {
-		panic("ScriptSortParams: Script may not be nil")
+		return nil
 	}
 
 	scriptMapRaw, ok := s.Script.Map()["script"]
 	if !ok {
-		panic("ScriptSortParams: Script.Map() did not contain key 'script'")
+		return nil
 	}
 
-	scriptMap, ok := scriptMapRaw.(map[string]interface{})
+	scriptMap, ok := scriptMapRaw.(map[string]any)
 	if !ok {
-		panic("ScriptSortParams: unexpected type for script map")
+		return nil
 	}
 
-	sortOptions := map[string]interface{}{
+	sortOptions := map[string]any{
 		"type":   s.Type,
 		"script": scriptMap,
 	}
@@ -102,7 +103,7 @@ func (s ScriptSortParams) Map() map[string]interface{} {
 		sortOptions["order"] = s.Order
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"_script": sortOptions,
 	}
 }
@@ -115,8 +116,8 @@ type SortParams struct {
 	NestedFilter Mappable
 }
 
-func (s SortParams) Map() map[string]interface{} {
-	sortOptions := map[string]interface{}{}
+func (s SortParams) Map() map[string]any {
+	sortOptions := map[string]any{}
 
 	if s.Order != "" {
 		sortOptions["order"] = s.Order
@@ -131,7 +132,7 @@ func (s SortParams) Map() map[string]interface{} {
 			sortOptions["nested_filter"] = s.NestedFilter.Map()
 		}
 	}
-	return map[string]interface{}{
+	return map[string]any{
 		s.Field: sortOptions,
 	}
 }
