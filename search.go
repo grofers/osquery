@@ -63,17 +63,11 @@ func (req *SearchRequest) Size(size uint64) *SearchRequest {
 	return req
 }
 
-// Sort sets how the results should be sorted.
-func (req *SearchRequest) Sort(params ...SortParams) *SearchRequest {
-	for _, param := range params {
-		req.sort = append(req.sort, param)
-	}
+// Sort appends one or more sort options.
+// Accepts any type that implements SortOption (field, script, raw)
+func (req *SearchRequest) Sort(opts ...SortOption) *SearchRequest {
+	req.sort = append(req.sort, opts...)
 	return req
-}
-
-// SortField is a convenience method for field-based sorting
-func (req *SearchRequest) SortField(params SortParams) *SearchRequest {
-	return req.Sort(params)
 }
 
 // SortScript is a convenience method for script-based sorting
@@ -88,8 +82,18 @@ func (req *SearchRequest) SortRaw(field string) *SearchRequest {
 	return req
 }
 
+// ClearSort removes all existing sort options
+func (req *SearchRequest) ClearSort() *SearchRequest {
+	req.sort = nil
+	return req
+}
+
 // SortByScript creates a new script-based sort option
 func (req *SearchRequest) SortByScript(scriptField *ScriptField, sortType string, order Order) *SearchRequest {
+	if scriptField == nil {
+		return req
+	}
+
 	params := ScriptSortParams{
 		Type:   sortType,
 		Script: scriptField,

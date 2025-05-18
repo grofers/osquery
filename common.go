@@ -62,7 +62,7 @@ type SortOption interface {
 	Map() map[string]interface{}
 }
 
-// rawSortField is a simple wrapper for raw sort fields
+// rawSortField is a simple wrapper for raw sort fields like "_score"
 type rawSortField string
 
 func (r rawSortField) Map() map[string]interface{} {
@@ -79,7 +79,19 @@ type ScriptSortParams struct {
 }
 
 func (s ScriptSortParams) Map() map[string]interface{} {
-	scriptMap := s.Script.Map()["script"].(map[string]interface{})
+	if s.Script == nil {
+		panic("ScriptSortParams: Script may not be nil")
+	}
+
+	scriptMapRaw, ok := s.Script.Map()["script"]
+	if !ok {
+		panic("ScriptSortParams: Script.Map() did not contain key 'script'")
+	}
+
+	scriptMap, ok := scriptMapRaw.(map[string]interface{})
+	if !ok {
+		panic("ScriptSortParams: unexpected type for script map")
+	}
 
 	sortOptions := map[string]interface{}{
 		"type":   s.Type,

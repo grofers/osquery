@@ -225,7 +225,7 @@ func TestScriptSortExtensions(t *testing.T) {
 		{
 			"mixed sort with field and script",
 			Search().
-				SortField(SortParams{Field: "regular_field", Order: OrderAsc}).
+				Sort(SortParams{Field: "regular_field", Order: OrderAsc}).
 				SortByScript(
 					Script("test_script").
 						Source("doc['field_name'].value").
@@ -248,6 +248,61 @@ func TestScriptSortExtensions(t *testing.T) {
 								"lang":   "painless",
 							},
 							"order": "desc",
+						},
+					},
+				},
+			},
+		},
+	})
+}
+
+// TestSortClear verifies the ClearSort functionality
+func TestSortClear(t *testing.T) {
+	runMapTests(t, []mapTest{
+		{
+			"clear sort removes all sort options",
+			Search().
+				Sort(SortParams{Field: "field1", Order: OrderAsc}).
+				ClearSort(),
+			map[string]interface{}{
+				// No "sort" key should be present when sort options are cleared
+			},
+		},
+		{
+			"add sort after clearing",
+			Search().
+				Sort(SortParams{Field: "field1", Order: OrderAsc}).
+				ClearSort().
+				Sort(SortParams{Field: "field2", Order: OrderDesc}),
+			map[string]interface{}{
+				"sort": []map[string]interface{}{
+					{
+						"field2": map[string]interface{}{
+							"order": "desc",
+						},
+					},
+				},
+			},
+		},
+		{
+			"clear sort with no existing sort options",
+			Search().ClearSort(),
+			map[string]interface{}{
+				// No "sort" key should be present
+			},
+		},
+		{
+			"multiple sort operations with clear in between",
+			Search().
+				Sort(SortParams{Field: "field1", Order: OrderAsc}).
+				Sort(SortParams{Field: "field2", Order: OrderDesc}).
+				ClearSort().
+				Sort(SortParams{Field: "field3", Order: OrderAsc}),
+			map[string]interface{}{
+				"sort": []map[string]interface{}{
+					{
+						"field3": map[string]interface{}{
+							"order": "asc",
 						},
 					},
 				},
