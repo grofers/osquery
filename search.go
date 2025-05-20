@@ -21,7 +21,7 @@ type SearchRequest struct {
 	postFilter   Mappable
 	query        Mappable
 	size         *uint64
-	sort         Sort
+	sort         []SortOption
 	source       Source
 	timeout      *time.Duration
 	scriptFields []*ScriptField
@@ -74,31 +74,8 @@ func (req *SearchRequest) Sort(opts ...SortOption) *SearchRequest {
 
 // SortScript is a convenience method for script-based sorting
 func (req *SearchRequest) SortScript(params ScriptSortParams) *SearchRequest {
-	req.sort = append(req.sort, params)
+	req.sort = append(req.sort, &params)
 	return req
-}
-
-// SortRaw allows sorting by a raw string like "_score"
-func (req *SearchRequest) SortRaw(field string) *SearchRequest {
-	if field == "" {
-		return req
-	}
-	req.sort = append(req.sort, rawSortField(field))
-	return req
-}
-
-// SortByScript creates a new script-based sort option
-func (req *SearchRequest) SortByScript(scriptField *ScriptField, sortType string, order Order) *SearchRequest {
-	if scriptField == nil {
-		return req
-	}
-
-	params := ScriptSortParams{
-		Type:   sortType,
-		Script: scriptField,
-		Order:  order,
-	}
-	return req.SortScript(params)
 }
 
 // SearchAfter retrieve the sorted result
@@ -163,13 +140,9 @@ func (req *SearchRequest) Map() map[string]interface{} {
 		m["size"] = *req.size
 	}
 	if len(req.sort) > 0 {
-		sortSlice := make([]interface{}, 0, len(req.sort))
+		sortSlice := make([]any, 0, len(req.sort))
 		for _, params := range req.sort {
-			if rawField, ok := params.(rawSortField); ok {
-				sortSlice = append(sortSlice, string(rawField))
-			} else {
-				sortSlice = append(sortSlice, params.Map())
-			}
+			sortSlice = append(sortSlice, params.Map())
 		}
 		m["sort"] = sortSlice
 	}

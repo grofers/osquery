@@ -10,7 +10,7 @@ func TestSortExtensions(t *testing.T) {
 	runMapTests(t, []mapTest{
 		{
 			"sort with basic order only",
-			Search().Sort(SortParams{Field: "field", Order: OrderAsc}),
+			Search().Sort(Field("field").Order(OrderAsc)),
 			map[string]any{
 				"sort": []map[string]any{
 					{
@@ -23,7 +23,7 @@ func TestSortExtensions(t *testing.T) {
 		},
 		{
 			"sort with mode",
-			Search().Sort(SortParams{Field: "field", Order: OrderDesc, Mode: SortModeAvg}),
+			Search().Sort(Field("field").Order(OrderDesc).Mode(SortModeAvg)),
 			map[string]any{
 				"sort": []map[string]any{
 					{
@@ -37,7 +37,7 @@ func TestSortExtensions(t *testing.T) {
 		},
 		{
 			"sort with nested_path",
-			Search().Sort(SortParams{Field: "nested.field", Order: OrderAsc, NestedPath: "nested"}),
+			Search().Sort(Field("nested.field").Order(OrderAsc).NestedPath("nested")),
 			map[string]any{
 				"sort": []map[string]any{
 					{
@@ -51,12 +51,12 @@ func TestSortExtensions(t *testing.T) {
 		},
 		{
 			"sort with nested_path and nested_filter",
-			Search().Sort(SortParams{
-				Field:        "nested.field",
-				Order:        OrderAsc,
-				NestedPath:   "nested",
-				NestedFilter: Match("nested.type").Query("value"),
-			}),
+			Search().Sort(
+				Field("nested.field").
+					Order(OrderAsc).
+					NestedPath("nested").
+					NestedFilter(Match("nested.type").Query("value")),
+			),
 			map[string]any{
 				"sort": []map[string]any{
 					{
@@ -77,13 +77,13 @@ func TestSortExtensions(t *testing.T) {
 		},
 		{
 			"sort with mode, nested_path and nested_filter",
-			Search().Sort(SortParams{
-				Field:        "nested.field",
-				Order:        OrderDesc,
-				Mode:         SortModeMax,
-				NestedPath:   "nested",
-				NestedFilter: Match("nested.type").Query("value"),
-			}),
+			Search().Sort(
+				Field("nested.field").
+					Order(OrderDesc).
+					Mode(SortModeMax).
+					NestedPath("nested").
+					NestedFilter(Match("nested.type").Query("value")),
+			),
 			map[string]any{
 				"sort": []map[string]any{
 					{
@@ -106,14 +106,14 @@ func TestSortExtensions(t *testing.T) {
 		{
 			"multiple sorts with different options",
 			Search().
-				Sort(SortParams{Field: "field1", Order: OrderAsc}).
-				Sort(SortParams{
-					Field:        "nested.field",
-					Order:        OrderDesc,
-					Mode:         SortModeMin,
-					NestedPath:   "nested",
-					NestedFilter: Match("nested.type").Query("value"),
-				}),
+				Sort(Field("field1").Order(OrderAsc)).
+				Sort(
+					Field("nested.field").
+						Order(OrderDesc).
+						Mode(SortModeMin).
+						NestedPath("nested").
+						NestedFilter(Match("nested.type").Query("value")),
+				),
 			map[string]any{
 				"sort": []map[string]any{
 					{
@@ -142,16 +142,29 @@ func TestSortExtensions(t *testing.T) {
 }
 
 func TestScriptSortExtensions(t *testing.T) {
+	// Create script fields for reuse
+	scriptField1 := Script("test_script").
+		Source("doc['field_name'].value").
+		Lang("painless")
+
+	scriptField2 := Script("test_script").
+		Source("doc['field_name'].value * params.factor").
+		Lang("painless").
+		Params(ScriptParams{"factor": 1.5})
+
+	scriptField3 := Script("test_script").
+		Source("if (doc['parent_obj.score_field'].size()!=0) { return ( Math.log(doc['parent_obj.score_field'].value*100 + 10 ) * _score ) } else { return _score }").
+		Lang("painless")
+
+	// Create script sort params for reuse
+	scriptSortParams1 := ScriptSort(scriptField1, "number").Order(OrderDesc)
+	scriptSortParams2 := ScriptSort(scriptField2, "number").Order(OrderAsc)
+	scriptSortParams3 := ScriptSort(scriptField3, "number").Order(OrderDesc)
+
 	runMapTests(t, []mapTest{
 		{
 			"sort with script",
-			Search().SortByScript(
-				Script("test_script").
-					Source("doc['field_name'].value").
-					Lang("painless"),
-				"number",
-				OrderDesc,
-			),
+			Search().SortScript(*scriptSortParams1),
 			map[string]any{
 				"sort": []map[string]any{
 					{
@@ -169,14 +182,7 @@ func TestScriptSortExtensions(t *testing.T) {
 		},
 		{
 			"sort with script and params",
-			Search().SortByScript(
-				Script("test_script").
-					Source("doc['field_name'].value * params.factor").
-					Lang("painless").
-					Params(ScriptParams{"factor": 1.5}),
-				"number",
-				OrderAsc,
-			),
+			Search().SortScript(*scriptSortParams2),
 			map[string]any{
 				"sort": []map[string]any{
 					{
@@ -198,17 +204,13 @@ func TestScriptSortExtensions(t *testing.T) {
 		{
 			"sort with raw field and script",
 			Search().
-				SortRaw("_score").
-				SortByScript(
-					Script("test_script").
-						Source("if (doc['parent_obj.score_field'].size()!=0) { return ( Math.log(doc['parent_obj.score_field'].value*100 + 10 ) * _score ) } else { return _score }").
-						Lang("painless"),
-					"number",
-					OrderDesc,
-				),
+				Sort(Field("_score")).
+				SortScript(*scriptSortParams3),
 			map[string]any{
 				"sort": []any{
-					"_score",
+					map[string]any{
+						"_score": map[string]any{},
+					},
 					map[string]any{
 						"_script": map[string]any{
 							"type": "number",
@@ -225,14 +227,8 @@ func TestScriptSortExtensions(t *testing.T) {
 		{
 			"mixed sort with field and script",
 			Search().
-				Sort(SortParams{Field: "regular_field", Order: OrderAsc}).
-				SortByScript(
-					Script("test_script").
-						Source("doc['field_name'].value").
-						Lang("painless"),
-					"number",
-					OrderDesc,
-				),
+				Sort(Field("regular_field").Order(OrderAsc)).
+				SortScript(*scriptSortParams1),
 			map[string]any{
 				"sort": []map[string]any{
 					{
