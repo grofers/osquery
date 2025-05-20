@@ -87,12 +87,6 @@ func (req *SearchRequest) SortRaw(field string) *SearchRequest {
 	return req
 }
 
-// ClearSort removes all existing sort options
-func (req *SearchRequest) ClearSort() *SearchRequest {
-	req.sort = req.sort[:0]
-	return req
-}
-
 // SortByScript creates a new script-based sort option
 func (req *SearchRequest) SortByScript(scriptField *ScriptField, sortType string, order Order) *SearchRequest {
 	if scriptField == nil {
