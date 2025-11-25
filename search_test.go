@@ -151,5 +151,14 @@ func TestSearchMaps(t *testing.T) {
 				},
 			},
 		},
+		{
+			"a search with collapse",
+			Search().Collapse(CollapseField("variant_group.group_id")),
+			map[string]interface{}{
+				"collapse": map[string]interface{}{
+					"field": "variant_group.group_id",
+				},
+			},
+		},
 	})
 }
