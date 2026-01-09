@@ -448,6 +448,7 @@ type TermsQuery struct {
 	field  string
 	values []interface{}
 	boost  float32
+	name   string
 }
 
 // Terms creates a new query of type "terms" on the provided field, and
@@ -465,6 +466,12 @@ func (q *TermsQuery) Values(values ...interface{}) *TermsQuery {
 	return q
 }
 
+// Name sets the name for the query.
+func (q *TermsQuery) Name(name string) *TermsQuery {
+	q.name = name
+	return q
+}
+
 // Boost sets the boost value of the query.
 func (q *TermsQuery) Boost(b float32) *TermsQuery {
 	q.boost = b
@@ -477,6 +484,9 @@ func (q TermsQuery) Map() map[string]interface{} {
 	innerMap := map[string]interface{}{q.field: q.values}
 	if q.boost > 0 {
 		innerMap["boost"] = q.boost
+	}
+	if q.name != "" {
+		innerMap["_name"] = q.name
 	}
 
 	return map[string]interface{}{"terms": innerMap}
