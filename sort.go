@@ -106,7 +106,7 @@ func (f *FieldSortOption) WithOrder(order Order) *FieldSortOption {
 	return f
 }
 
-func (f *FieldSortOption) Order(order Order) Order {
+func (f *FieldSortOption) Order() Order {
 	return f.order
 }
 
