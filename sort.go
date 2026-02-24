@@ -53,12 +53,12 @@ func ScriptSort(scriptField *ScriptField, sortType string) *ScriptSortOption {
 	}
 }
 
-func (s *ScriptSortOption) WithOrder(order Order) *ScriptSortOption {
+func (s *ScriptSortOption) Order(order Order) *ScriptSortOption {
 	s.order = order
 	return s
 }
 
-func (s *ScriptSortOption) Order() Order {
+func (s *ScriptSortOption) GetOrder() Order {
 	return s.order
 }
 
