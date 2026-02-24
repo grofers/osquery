@@ -34,7 +34,7 @@ const (
 // SortOption is an interface for different types of sort options
 type SortOption interface {
 	Map() map[string]any
-	Order() Order
+	GetOrder() Order
 }
 
 // ScriptSortOption represents a script-based sort option for elasticsearch
