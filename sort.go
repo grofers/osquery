@@ -101,12 +101,12 @@ func FieldSort(field string) *FieldSortOption {
 	}
 }
 
-func (f *FieldSortOption) WithOrder(order Order) *FieldSortOption {
+func (f *FieldSortOption) Order(order Order) *FieldSortOption {
 	f.order = order
 	return f
 }
 
-func (f *FieldSortOption) Order() Order {
+func (f *FieldSortOption) GetOrder() Order {
 	return f.order
 }
 
