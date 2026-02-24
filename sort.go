@@ -34,6 +34,7 @@ const (
 // SortOption is an interface for different types of sort options
 type SortOption interface {
 	Map() map[string]any
+	GetOrder() Order
 }
 
 // ScriptSortOption represents a script-based sort option for elasticsearch
@@ -55,6 +56,10 @@ func ScriptSort(scriptField *ScriptField, sortType string) *ScriptSortOption {
 func (s *ScriptSortOption) Order(order Order) *ScriptSortOption {
 	s.order = order
 	return s
+}
+
+func (s *ScriptSortOption) GetOrder() Order {
+	return s.order
 }
 
 func (s *ScriptSortOption) Map() map[string]any {
@@ -99,6 +104,10 @@ func FieldSort(field string) *FieldSortOption {
 func (f *FieldSortOption) Order(order Order) *FieldSortOption {
 	f.order = order
 	return f
+}
+
+func (f *FieldSortOption) GetOrder() Order {
+	return f.order
 }
 
 func (f *FieldSortOption) Mode(mode Mode) *FieldSortOption {
