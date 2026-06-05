@@ -91,6 +91,7 @@ type FieldSortOption struct {
 	field        string
 	order        Order
 	mode         Mode
+	missing      string
 	nestedPath   string
 	nestedFilter Mappable
 }
@@ -125,6 +126,11 @@ func (f *FieldSortOption) NestedFilter(nestedFilter Mappable) *FieldSortOption {
 	return f
 }
 
+func (f *FieldSortOption) Missing(missing string) *FieldSortOption {
+	f.missing = missing
+	return f
+}
+
 func (f *FieldSortOption) Map() map[string]any {
 	sortOptions := map[string]any{}
 
@@ -134,6 +140,10 @@ func (f *FieldSortOption) Map() map[string]any {
 
 	if f.mode != "" {
 		sortOptions["mode"] = f.mode
+	}
+
+	if f.missing != "" {
+		sortOptions["missing"] = f.missing
 	}
 
 	if f.nestedPath != "" {
